@@ -58,6 +58,7 @@ class ForecastDataPreparation:
             select(DF["*"],DF2.BeginDate,DF2.EndDate,
                    DF2.Promo,DF2.Discount.alias("DStep"))
         
+        
         """ merged1 = merged.filter((F.col("Date")>=F.col("BeginDate")) & 
               (F.col("Date")<F.col("EndDate"))&
               (F.abs(F.col("DStep")-F.col("Discount"))<0.02)&
