@@ -45,7 +45,8 @@ def fit_forecasting_model(df):
     
 
 def optimize_promotions(Base_Demand, Promo_Sensitivity, Total_PaidQty_Limit, Total_FreeQty_Limit,
-                        max_promo_length, min_promo_length, daily_paid_cap, daily_free_cap):
+                        max_promo_length, min_promo_length, daily_paid_cap, daily_free_cap,
+                        daily_product_count):
     
     # Parameters
 
@@ -75,7 +76,7 @@ def optimize_promotions(Base_Demand, Promo_Sensitivity, Total_PaidQty_Limit, Tot
 
     # Constraints
 
-        # DEMAND SATISFACTION
+    # DEMAND SATISFACTION
     for i in Products:
         for t in PHorizon:
             Promo_Model += P[i][t] + F[i][t] <= Base_Demand[i][t] + Promo_Sensitivity[i]*F[i][t]
@@ -93,7 +94,7 @@ def optimize_promotions(Base_Demand, Promo_Sensitivity, Total_PaidQty_Limit, Tot
         Promo_Model += lpSum(F[i][t] for t in PHorizon) <= Total_FreeQty_Limit
     # PROMOTED PRODUCTS AT TIME "t"
     for t in PHorizon:
-        Promo_Model += lpSum(X[i][t] for i in Products) <= 13
+        Promo_Model += lpSum(X[i][t] for i in Products) <= daily_product_count
     # PROMO PERIOD FOR PRODUCT "i"  
     for i in Products:
         Promo_Model += lpSum(X[i][t] for t in PHorizon) == L[i]
@@ -125,8 +126,8 @@ df = getData()
 
 col1, col2 = st.columns((1, 2))
 with col1:
-    max_promo_length = st.number_input("Max Promotion Length", value=30)
-    min_promo_length = st.number_input("Min Promotion Length", value=1)
+    max_promo_length = st.number_input("Max # of Days with Promotion", value=T)
+    min_promo_length = st.number_input("Min # of Days with Promotion", value=1)
 
     total_paid_cap = st.number_input("Total Paid Quantity Capacity", value=10000000)
     total_free_cap = st.number_input("Total Free Quantity Capacity", value=10000)
@@ -134,12 +135,13 @@ with col1:
     daily_paid_cap = st.number_input("Daily Paid Quantity Capacity", value=100000)
     daily_free_cap = st.number_input("Daily Free Quantity Capacity", value=1000)
 
-    daily_product_count = st.number_input("Daily Promoted Product Count", value=1)
+    daily_product_count = st.number_input("Daily Promoted Product Count", value=I)
     # horizon = st.slider("Time Horizon", 1, 31, 3)
 
 with col2:
     Base_Demand, Promo_Sensitivity = fit_forecasting_model(df)
     df_Promo_Ratio = optimize_promotions(Base_Demand, Promo_Sensitivity, total_paid_cap, total_free_cap, 
-                                         max_promo_length, min_promo_length, daily_paid_cap, daily_free_cap)
+                                         max_promo_length, min_promo_length, daily_paid_cap, daily_free_cap,
+                                         daily_product_count)
 
-    st.dataframe(df_Promo_Ratio)
+    st.dataframe(round(df_Promo_Ratio, 2))
