@@ -135,7 +135,7 @@ with col1:
     daily_free_cap = st.number_input("Daily Free Quantity Capacity", value=1000)
 
     daily_product_count = st.number_input("Daily Promoted Product Count", value=1)
-    horizon = st.slider("Time Horizon", 1, 31, 3)
+    # horizon = st.slider("Time Horizon", 1, 31, 3)
 
 with col2:
     Base_Demand, Promo_Sensitivity = fit_forecasting_model(df)
