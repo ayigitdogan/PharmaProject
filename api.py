@@ -21,7 +21,7 @@ def getData():
     return df
 
 
-def fit_forecasting_model(df):
+def fit_forecasting_model(df, promo_sensitivity_multiplier):
     coeff = []
     
     for p in products:
@@ -39,7 +39,7 @@ def fit_forecasting_model(df):
     coeff = pd.DataFrame(coeff)
     coeff.index = products
     Base_Demand = np.array(coeff.drop("FreeQty", axis=1))
-    Promo_Sensitivity = np.array(coeff.FreeQty)
+    Promo_Sensitivity = np.array(coeff.FreeQty)*promo_sensitivity_multiplier
 
     return Base_Demand, Promo_Sensitivity
     
@@ -135,11 +135,13 @@ with col1:
     daily_paid_cap = st.number_input("Daily Paid Quantity Capacity", value=100000)
     daily_free_cap = st.number_input("Daily Free Quantity Capacity", value=1000)
 
+    promo_sensitivity_multiplier = st.number_input("Promo Sensitivity Multiplier", value=1., step=0.25, format="%.2f")
+
     daily_product_count = st.number_input("Daily Promoted Product Count", value=I)
     # horizon = st.slider("Time Horizon", 1, 31, 3)
 
 with col2:
-    Base_Demand, Promo_Sensitivity = fit_forecasting_model(df)
+    Base_Demand, Promo_Sensitivity = fit_forecasting_model(df, promo_sensitivity_multiplier=promo_sensitivity_multiplier)
     df_Promo_Ratio = optimize_promotions(Base_Demand, Promo_Sensitivity, total_paid_cap, total_free_cap, 
                                          max_promo_length, min_promo_length, daily_paid_cap, daily_free_cap,
                                          daily_product_count)
